@@ -1,0 +1,39 @@
+
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  env:
+    Type: String
+Resources:
+  privatesg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for app
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${env}-vpc"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref publicsg
+  publicsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for ALB
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${env}-vpc"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+Outputs:
+  publicsg:
+    Value: !Ref publicsg
+    Export:
+      Name: !Sub "${env}-publicsg"
+  privatesg:
+    Value: !Ref privatesg
+    Export:
+      Name: !Sub "${env}-privatesg"

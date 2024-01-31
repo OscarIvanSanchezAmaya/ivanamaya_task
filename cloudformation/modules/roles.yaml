@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  env:
+    Type: String
+Resources:
+  taskrole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        RoleName: !Sub "${env}-taskrole"
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - codebuild.amazonaws.com
+                  - codepipeline.amazonaws.com
+                  - ecs-tasks.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Policies: 
+          - PolicyName: !Sub "${env}-accessPolicy"
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action: 
+                    - 'ecr:*'
+                    - 's3:*'
+                    - 'codebuild:*'
+                    - 'logs:*'
+                    - 'ecs:*'
+                    - 'iam:PassRole'
+                    - 'cloudwatch:*'
+                  Resource: '*'
+
+Outputs:
+  taskrole:
+    Value: !GetAtt taskrole.Arn
+    Export:
+      Name: !Sub "${env}-taskrole"

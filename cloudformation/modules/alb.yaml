@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  env:
+    Type: String
+
+Resources:
+  alb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "${env}-alb"
+      SecurityGroups: 
+        -
+          Fn::ImportValue:
+            !Sub "${env}-publicsg"
+      Subnets:
+        - Fn::ImportValue:
+            !Sub "${env}-publicsubnet1"
+        - Fn::ImportValue:
+            !Sub "${env}-publicsubnet2"
+      Type: 'application'
+      Scheme: internet-facing
+
+
+  target:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: '/'
+      HealthCheckTimeoutSeconds: 5
+      UnhealthyThresholdCount: 2
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${env}-vpc"
+
+  listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref target
+          Type: forward
+      LoadBalancerArn: !Ref alb
+      Port: '80'
+      Protocol: HTTP
+
+
+Outputs:
+  target:
+    Value: !Ref target
+    Export:
+      Name: !Sub "${env}-targetgroup"
+  targetfullname:
+    Value: !GetAtt  target.TargetGroupFullName
+    Export:
+      Name: !Sub "${env}-targetgroupfullname"
+
+
+
+  

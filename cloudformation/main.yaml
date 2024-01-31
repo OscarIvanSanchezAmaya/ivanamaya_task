@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  env:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - stage
+      - prod
+  bucket:
+    Type: String
+  email:
+    Type: String
+    
+Mappings: 
+  ip:
+    dev:
+      "range": "10.0"
+    stage:
+      "range": "11.0"
+    prod: 
+      "range": "12.0"
+Resources:
+  vpc:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${bucket}/modules/vpc.yaml"
+      Parameters:
+        env: !Ref env
+        ip: !FindInMap [ip, !Ref env, range]
+  sg:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: vpc
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${bucket}/modules/sg.yaml"
+      Parameters:
+        env: !Ref env
+  roles:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${bucket}/modules/roles.yaml"
+      Parameters:
+        env: !Ref env
+  alb:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: 
+      - vpc
+      - sg
+
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${bucket}/modules/alb.yaml"
+      Parameters:
+        env: !Ref env
+  ci:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - roles
+      - ecs
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${bucket}/modules/ci.yaml"
+      Parameters:
+        env: !Ref env
+        bucket: !Ref bucket
+  ecs:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - vpc
+      - roles
+      - sg
+      - alb
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${bucket}/modules/ecs.yaml"
+      Parameters:
+        env: !Ref env
+  alarms:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: ci
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${bucket}/modules/alarms.yaml"
+      Parameters:
+        env: !Ref env
+        email: !Ref email

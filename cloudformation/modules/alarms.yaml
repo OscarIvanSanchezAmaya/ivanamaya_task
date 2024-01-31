@@ -1,0 +1,36 @@
+Parameters:
+  env:
+    Type: String
+  email:
+    Type: String
+Resources:
+  topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref email
+          Protocol: "email"
+      TopicName: !Sub "${env}-topic"
+
+  cpualarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: CPU alarm
+      AlarmActions:
+      - !Ref topic
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+      Statistic: Average
+      Period: '60'
+      EvaluationPeriods: '3'
+      Threshold: '.20'
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+      - Name: ClusterName
+        Value: 
+          Fn::ImportValue:
+            !Sub "${env}-cluster"
+      - Name: ServiceName
+        Value:
+          Fn::ImportValue:
+            !Sub "${env}-service"
