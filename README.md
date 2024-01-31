@@ -11,6 +11,8 @@ you can upload the main.yaml to the bucket so when create the stack just specify
 go to cloudformation and create a stack -> upload the file or set the Url in s3 for main.yaml -> fill the parameters, about env for now just will acept dev,stage,prod
 continue with all the default configurations for the stack and create it.
 ### Cli:
+`aws cloudformation create-stack --template-body file://main.yaml --stack-name {{name}} --parameters ParameterKey=bucket,ParameterValue={{bucket-name}} ParameterKey=email,ParameterValue={{emailForAlerts}} ParameterKey=env,ParameterValue{{dev/stage/prod}}`
+        if the main.yaml is in the bucket you can change --template-body for --template-url
 ### comments:
 this will take some time and in the first run will deploy a container with amazon-ecs-sample but when codepipeline finish the app will be deployed.
 ##  general comments:
