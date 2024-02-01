@@ -23,7 +23,7 @@ Resources:
       Statistic: Average
       Period: '60'
       EvaluationPeriods: '3'
-      Threshold: '.20'
+      Threshold: '80'
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
       - Name: ClusterName
@@ -33,4 +33,4 @@ Resources:
       - Name: ServiceName
         Value:
           Fn::ImportValue:
-            !Sub "${env}-service"
+            !Sub "${env}-servicename"

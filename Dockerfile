@@ -4,4 +4,6 @@ COPY app.py resume_OscarIvanSanchezAmaya.pdf ./
 #RUN pip3 install --upgrade pip
 RUN pip3 install flask --progress-bar off
 RUN pip3 install waitress --progress-bar off
+RUN pip3 install paste --progress-bar off
+
 CMD [ "python" , "./app.py" ]

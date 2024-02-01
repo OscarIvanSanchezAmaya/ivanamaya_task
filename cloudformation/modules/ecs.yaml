@@ -155,3 +155,7 @@ Outputs:
     Value: !Ref service
     Export:
       Name: !Sub "${env}-service"
+  servicename:
+    Value: !GetAtt service.Name
+    Export:
+      Name: !Sub "${env}-servicename"
